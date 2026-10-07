@@ -78,6 +78,21 @@ function api(complete = vi.fn(async (_request: StructuredRequest): Promise<Resul
   return { complete, classify, save }
 }
 describe('regeneration transaction', () => {
+  it.each([true, false])('respects Story Memory being %s while retaining independent Breakthrough continuity', async (enabled) => {
+    useModsStore.setState({ switches: { on: { 'story-memory': enabled, breakthrough: true }, options: {} } })
+    useGameStore.setState({ playthroughId: '123', history: { 6: { 0: 'Sarah and the reader planned a picnic.' } },
+      exBreakthrough: { meters: { a: 35 }, settled: {}, pending: null,
+        moments: { a: [{ id: 'promise', date: 6, time: 0, outcome: 'Sarah promised to bring the picnic basket.' }] } } })
+    const { complete } = api(), before = useGameStore.getState().exBreakthrough
+    await regenerateTextReply('a', persistRegeneratedConversation)
+    const request = complete.mock.calls[0][0]
+    if (enabled) {
+      expect(request.storyMemory?.records.map(r => r.text)).toContain('Sarah and the reader planned a picnic.')
+      expect(request.storyMemory?.cast).toContain('a')
+    } else expect(request.storyMemory).toBeUndefined()
+    expect(request.user).toContain('Sarah promised to bring the picnic basket.')
+    expect(useGameStore.getState().exBreakthrough).toEqual(before)
+  })
   it('saves the entire replacement before making it visible; read receipts do not cancel it', async () => {
     const { complete, save } = api()
     let finish!: (value: Result<TextingResponse>) => void

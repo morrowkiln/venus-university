@@ -644,7 +644,7 @@ export async function regenerateTextReply(charId: string, commit: (
   try {
     const prior = beforeTextReply(target), character = game.characters[charId]
     const request = buildTextingPrompt(character, game.charInfo[charId], prior, target.sent.text, {
-      date: game.date, time: game.time, stats: game.stats,
+      date: game.date, time: game.time, stats: game.stats, storyMemory: currentStorySnapshot(),
       roster: game.chars.filter(id => id !== charId).map(id => game.characters[id]).filter(Boolean),
       charInfo: game.charInfo, npcRelationships: game.npcRelationships, classes: game.classes,
       playerSchedule: game.playerSchedule, playerJob: game.job, occasions: game.occasions,
