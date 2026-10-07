@@ -143,56 +143,61 @@ export interface SlotIntroInput {
   rumorPlace?: LoreEntry
 }
 
-/** The narration-only schema: no speaker, emotion, action or bg to emit. */
-const SCHEMA = objectSchema('slot_intro', ['lines'], {
-  lines: {
-    type: 'array',
-    items: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['text'],
-      properties: { text: { type: 'string' } }
-    }
-  },
-  hangouts: {
-    type: 'array',
-    items: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['char', 'text', 'description'],
-      properties: {
-        char: { type: 'string' },
-        text: { type: 'string' },
-        description: { type: 'string' }
+/**
+ * The narration-only schema: no speaker, emotion, action or bg to emit. Built per call, since the
+ * fields mods add to a post follow which mods are on.
+ */
+function slotIntroSchema(): ReturnType<typeof objectSchema> {
+  return objectSchema('slot_intro', ['lines'], {
+    lines: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['text'],
+        properties: { text: { type: 'string' } }
+      }
+    },
+    hangouts: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['char', 'text', 'description'],
+        properties: {
+          char: { type: 'string' },
+          text: { type: 'string' },
+          description: { type: 'string' }
+        }
+      }
+    },
+    breakups: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['char', 'texts'],
+        properties: {
+          char: { type: 'string' },
+          texts: { type: 'array', items: { type: 'string' } }
+        }
+      }
+    },
+    posts: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['char', 'text', ...promptRequired('slot-posts')],
+        properties: {
+          char: { type: 'string' },
+          text: { type: 'string' },
+          ...promptFields('slot-posts')
+        }
       }
     }
-  },
-  breakups: {
-    type: 'array',
-    items: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['char', 'texts'],
-      properties: {
-        char: { type: 'string' },
-        texts: { type: 'array', items: { type: 'string' } }
-      }
-    }
-  },
-  posts: {
-    type: 'array',
-    items: {
-      type: 'object',
-      additionalProperties: false,
-      required: ['char', 'text', ...promptRequired('slot-posts')],
-      properties: {
-        char: { type: 'string' },
-        text: { type: 'string' },
-        ...promptFields('slot-posts')
-      }
-    }
-  }
-})
+  })
+}
 
 /** What the sky is doing as the slot opens, on a slot there is anything to say about. */
 function weatherBlock(input: SlotIntroInput): string[] {
@@ -488,7 +493,7 @@ export function buildSlotIntroPrompt(
     ].join('\n'),
     user,
     ...recallPayload(input.storyMemory, [], input.recent.join(" ")),
-    schema: SCHEMA,
+    schema: slotIntroSchema(),
     cacheKey: input.playthroughId,
     kind: 'slotIntro'
   }
