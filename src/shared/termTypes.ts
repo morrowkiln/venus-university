@@ -1,4 +1,5 @@
 import type { GameSave } from './types'
+import type { ModTermCarry } from './modTermCarry'
 
 /**
  * What continuable semesters add to the on-disk shapes, added from outside them where the
@@ -37,7 +38,7 @@ export type TermCarry = Pick<
   | 'bunnybotTwoTimingTipSent'
   | 'bunnybotDeferred'
 > &
-  Pick<Partial<GameSave>, 'tallies' | 'npcFriendships' | 'bunnybotSeenTipSent'>
+  Pick<Partial<GameSave>, 'tallies' | 'npcFriendships' | 'bunnybotSeenTipSent'> & ModTermCarry
 
 declare module './types' {
   interface PlaythroughRecord {

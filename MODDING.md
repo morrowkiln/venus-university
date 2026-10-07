@@ -22,8 +22,10 @@ released it. This branch is every mod together:
 | Story Memory | Maestro | any time | [notes](docs/mods/story-memory.md) |
 
 Maestro's mods each came in as their own pull request on the frame and are merged here as he
-wrote them. Each keeps its own save fields; a continued semester starts those fresh
-(`src/shared/termCarry.ts`) until their author says what should carry.
+wrote them. Continued semesters retain their saved Story Memory, Meanwhile replays,
+Breakthrough meters/outcomes and active Plot Twist, including while those switches are off.
+Dates are rebased and old events keep their original semester labels. See the
+[carryover policy](docs/mods/semester-carryover.md) and `src/shared/modTermCarry.ts`.
 
 ## The three things a mod does
 

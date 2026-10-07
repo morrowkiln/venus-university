@@ -19,6 +19,7 @@ import { manualSaveOffer, writeStoryMemory } from '../stores/loop/saves'
 import { inspectCurrentStoryMemory } from '../stores/storyMemory'
 import { gestures, lift, press, quietLift, quietPress, panelUnderTab, veilIn } from './motion'
 import '../vu_styles/StoryMemory.css'
+import { termOriginLabel } from '@shared/termOrigin'
 
 export function StoryMemoryModal({
   theme,
@@ -62,13 +63,7 @@ export function StoryMemoryModal({
     game.exStoryMemory,
     hidden
   ])
-  const choices = [
-    ['reader', 'The reader'],
-    ...game.chars.map((id) => [
-      id,
-      `${game.characters[id]?.firstName ?? 'Unknown'} ${game.characters[id]?.lastName ?? ''}`.trim()
-    ])
-  ]
+  const choices = Object.entries(snapshot?.names ?? { reader: 'The reader' })
   const name = (id: string): string => snapshot?.names[id] ?? id
   const isHidden = (r: StoryRecord): boolean =>
     game.exStoryMemory.hidden.includes(r.id) ||
@@ -291,7 +286,7 @@ export function StoryMemoryModal({
                   }}
                 >
                   <span className="vu-story-memory-reading">
-                    {r.kind} · Day {r.date} · {r.time ? 'night' : 'day'}
+                    {r.kind} · {r.origin ? termOriginLabel(r.origin) : `Day ${r.date}`} · {r.time ? 'night' : 'day'}
                     {isHidden(r) ? ' · hidden' : ''}
                   </span>
                   <span>{r.text}</span>

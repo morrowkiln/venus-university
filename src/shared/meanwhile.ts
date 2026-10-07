@@ -1,6 +1,7 @@
 import type { NpcRelationshipMap, NpcEncounter } from './npcRelationships'
 import type { Character, CharInfo, ClassEntry } from './types'
 import { locationLabel } from './locations'
+import { normalizeTermOrigin, type TermOrigin } from './termOrigin'
 
 export const MEANWHILE_MOD = 'meanwhile-conversations'
 export interface MeanwhileLine { speaker: string; text: string }
@@ -15,6 +16,8 @@ export interface MeanwhileScene {
   ref: string
   kind: NpcEncounter['kind']
   lines: MeanwhileLine[]
+  origin?: TermOrigin
+  participantNames?: Record<string, string>
 }
 /** Optional dramatizations, not witnessed events or authoritative story memories. */
 export interface MeanwhileStore { version: 1; scenes: MeanwhileScene[] }
@@ -43,14 +46,21 @@ export function normalizeMeanwhile(value: unknown): MeanwhileStore {
   const kept: MeanwhileScene[] = []
   const scenes = (value as MeanwhileStore | null)?.scenes
   if (Array.isArray(scenes)) for (const scene of scenes.slice(-50)) {
-    if (!scene || typeof scene.id !== 'string' || scene.id.length > 500 ||
-      !Number.isSafeInteger(scene.date) || scene.date < 0 || !Array.isArray(scene.participants) ||
+    const origin = normalizeTermOrigin(scene?.origin)
+    if (!scene || typeof scene.id !== 'string' ||
+      (scene.id.length > 500 && !(/^term:\d{1,4}:/.test(scene.id) && scene.id.length <= 510)) ||
+      !Number.isSafeInteger(scene.date) || scene.date < -100000 || (scene.date < 0 && !origin) || !Array.isArray(scene.participants) ||
       scene.participants.length !== 2 || scene.participants[0] === scene.participants[1] ||
       scene.participants.some(id => typeof id !== 'string' || !id || id.length > 160) ||
       !['class','hangout','dorm'].includes(scene.kind) || typeof scene.positive !== 'boolean' ||
       (['title','where','ref'] as const).some(key => typeof scene[key] !== 'string' || scene[key].length > 500)) continue
     try {
       kept.push({ id: scene.id, date: scene.date, participants: [...scene.participants],
+        ...(origin ? { origin } : {}),
+        ...(scene.participantNames ? { participantNames: Object.fromEntries(scene.participants.flatMap(id => {
+          const name = scene.participantNames?.[id]
+          return typeof name === 'string' && name.trim() ? [[id, name.trim().slice(0,200)]] : []
+        })) } : {}),
         title: scene.title, where: scene.where, ref: scene.ref, kind: scene.kind, positive: scene.positive,
         lines: validateMeanwhile(scene, scene.participants) })
     } catch { /* Invalid optional cache entries do not invalidate the playthrough. */ }
@@ -62,7 +72,7 @@ export function meanwhileEvents(game: MeanwhileContext): MeanwhileScene[] {
   const rows = new Map<string, MeanwhileScene>()
   const known = (ids: readonly string[]): boolean => ids.every(id => game.characters[id] && game.charInfo[id]?.nameKnown)
   for (const scene of normalizeMeanwhile(game.exNpcWatch).scenes) {
-    if (scene.date <= game.date && known(scene.participants)) rows.set(scene.id, scene)
+    if (scene.date <= game.date && (known(scene.participants) || (scene.origin && scene.date < 0))) rows.set(scene.id, scene)
   }
   for (const [key, pair] of Object.entries(game.npcRelationships)) {
     const ids = key.split('|'), encounter = pair.encounter
@@ -74,6 +84,7 @@ export function meanwhileEvents(game: MeanwhileContext): MeanwhileScene[] {
     const where = kind === 'class' ? (game.classes[ref]?.name ?? ref) :
       kind === 'dorm' ? 'the dorm common area' : ref === 'room' ? 'a dorm room' : locationLabel(ref)
     rows.set(id, { id, date, participants: ids as [string,string], positive, kind, ref, where,
+      participantNames: Object.fromEntries(ids.map(id => [id, `${game.characters[id].firstName} ${game.characters[id].lastName}`.trim()])),
       title: ids.map(id => game.characters[id].firstName).join(' & ') + (positive ? ' · Bonded' : ' · Argued'), lines: [] })
   }
   return [...rows.values()].sort((a,b) => b.date-a.date || a.id.localeCompare(b.id)).slice(0,50)

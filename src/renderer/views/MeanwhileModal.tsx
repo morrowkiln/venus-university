@@ -13,6 +13,7 @@ import { formatShortGameDate } from '../prompts/gameDate'
 import { bgUrl } from './bgAssets'
 import { gestures, lift, press, quietLift, quietPress, panelUnderTab, veilIn } from './motion'
 import '../vu_styles/Meanwhile.css'
+import { termOriginLabel } from '@shared/termOrigin'
 
 export function MeanwhileModal({ theme, onClose }: { theme: 'day'|'night'; onClose: () => void }): JSX.Element | null {
   const game = useGameStore(s => s), on = useModOn(MEANWHILE_MOD)
@@ -29,6 +30,7 @@ export function MeanwhileModal({ theme, onClose }: { theme: 'day'|'night'; onClo
   if (!host || !on) return null
   const rows=meanwhileEvents(game), line=selected?.lines[index]
   const speaker=line?game.characters[line.speaker]:undefined
+  const dateLabel = (event: MeanwhileScene): string => event.origin ? termOriginLabel(event.origin) : formatShortGameDate(event.date)
   async function watch(event: MeanwhileScene): Promise<void> {
     cancel(); setSelected(event); setIndex(0); setError(''); setBusy(false)
     if(event.lines.length) return
@@ -45,23 +47,23 @@ export function MeanwhileModal({ theme, onClose }: { theme: 'day'|'night'; onClo
   return createPortal(<motion.div className="vu-veil" data-theme={theme} variants={veilIn} initial="hidden" animate="shown" exit="gone" {...overlayProps}>
     <motion.section className="vu-meanwhile vu-paper" role="dialog" aria-modal="true" aria-label="Meanwhile conversations" variants={panelUnderTab}>
       <TitleTab>Meanwhile…</TitleTab>
-      <p className="vu-meanwhile-note">A glimpse of campus life. Optional dramatizations of recent encounters; your character does not witness these.</p>
+      <p className="vu-meanwhile-note">A glimpse of campus life. Recent encounters and up to 50 saved replays, including past semesters. Your character does not witness these dramatizations.</p>
       <div className="vu-meanwhile-body">
         <nav className="vu-meanwhile-events" aria-label="NPC encounters">
           {rows.length?rows.map(event=><motion.button key={event.id} type="button" className="vu-meanwhile-event" aria-pressed={selected?.id===event.id}
             disabled={!event.lines.length&&!meanwhileReady()} {...gestures(!event.lines.length&&!meanwhileReady(),quietLift,quietPress)} onClick={()=>void watch(event)}>
-            <strong>{event.title}</strong><span>{formatShortGameDate(event.date)} · {event.where}</span><small>{event.lines.length?'Watch again':'Watch conversation'}</small>
+            <strong>{event.title}</strong><span>{dateLabel(event)} · {event.where}</span><small>{event.lines.length?'Watch again':'Watch conversation'}</small>
           </motion.button>):<p>No recent encounters between known characters yet. Check back as the semester progresses.</p>}
         </nav>
         <section className="vu-meanwhile-view" aria-label="Conversation viewer">
           {backdrop&&<img className="vu-meanwhile-backdrop" src={backdrop} alt=""/>}
           <div className="vu-meanwhile-story">
             <h3>{selected?.title??'Off the beaten path'}</h3>
-            <p>{selected?`${selected.where} · ${formatShortGameDate(selected.date)}`:'Choose an encounter to watch. Writing a new conversation uses your configured AI; replays use the saved copy.'}</p>
+            <p>{selected?`${selected.where} · ${dateLabel(selected)}`:'Choose an encounter to watch. Writing a new conversation uses your configured AI; replays use the saved copy.'}</p>
             {busy&&<p role="status">Writing their conversation…</p>}
             {error&&<div role="alert"><p>{error}</p><motion.button className="vu-btn vu-btn--quiet" {...gestures(false,quietLift,quietPress)} onClick={()=>selected&&void watch(selected)}>Retry</motion.button></div>}
             {line&&<div className="vu-meanwhile-line"><img src={profileUrl(line.speaker)} alt="" onError={e=>{e.currentTarget.style.visibility='hidden'}}/>
-              <div><strong>{speaker?fullNameOf(speaker):'Character'}</strong><p>{line.text}</p></div></div>}
+              <div><strong>{selected?.participantNames?.[line.speaker] ?? (speaker?fullNameOf(speaker):'Character')}</strong><p>{line.text}</p></div></div>}
           </div>
           <div className="vu-meanwhile-controls">
             <motion.button className="vu-btn vu-btn--quiet" disabled={!line||index===0} {...gestures(!line||index===0,quietLift,quietPress)} onClick={()=>setIndex(i=>i-1)}>Previous</motion.button>

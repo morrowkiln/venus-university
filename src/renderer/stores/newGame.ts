@@ -498,7 +498,8 @@ export function keptFrom(
     carried: carryTerm(
       save,
       record,
-      kept.map((c) => c.charId)
+      kept.map((c) => c.charId),
+      from.characters
     )
   }
 }

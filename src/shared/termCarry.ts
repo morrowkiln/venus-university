@@ -6,6 +6,7 @@ import { emptyTallies } from './tallies'
 import { daysToNextTerm, graduatesAfter, seasonOf, termIndexOf, type Season } from './term'
 import type {
   BunnyboardState,
+  Character,
   CharMemory,
   CharState,
   Conversation,
@@ -15,6 +16,7 @@ import type {
   SaveDraft
 } from './types'
 import type { TermCarry } from './termTypes'
+import { carryModState } from './modTermCarry'
 
 /**
  * Carrying a finished semester into the next one: who can come back, and what the new term's
@@ -162,7 +164,8 @@ export interface CarriedTerm {
 export function carryTerm(
   save: GameSave,
   record: PlaythroughRecord,
-  kept: readonly string[]
+  kept: readonly string[],
+  characters: Record<string, Character> = {}
 ): CarriedTerm {
   const back = daysToNextTerm(seasonOf(termIndexOf(record)))
   const roster = new Set(record.chars)
@@ -173,6 +176,7 @@ export function carryTerm(
     stats: rustedStats(save.stats),
     ...(save.bio ? { bio: save.bio } : {}),
     carry: {
+      ...carryModState(save, termIndexOf(record), back, characters),
       money: save.money,
       ...(save.tallies ? { tallies: { ...save.tallies } } : {}),
       inventory: save.inventory.map((item) => ({ ...item })),
@@ -225,6 +229,10 @@ export function carriedOpening(draft: SaveDraft, carry: TermCarry): SaveDraft {
   )
   return {
     ...draft,
+    ...(carry.exPlotTwist !== undefined ? { exPlotTwist: carry.exPlotTwist } : {}),
+    ...(carry.exStoryMemory ? { exStoryMemory: carry.exStoryMemory } : {}),
+    ...(carry.exBreakthrough ? { exBreakthrough: carry.exBreakthrough } : {}),
+    ...(carry.exNpcWatch ? { exNpcWatch: carry.exNpcWatch } : {}),
     money: carry.money,
     tallies: {
       ...emptyTallies(),
@@ -263,12 +271,10 @@ const _SAVE_FIELDS: Record<keyof SaveDraft, 'carried' | 'fresh'> = {
   stats: 'carried',
   money: 'carried',
   bio: 'carried',
-  // Maestro's mods keep their own save fields. A continued semester starts each of them fresh
-  // until its author says what should carry.
-  exPlotTwist: 'fresh',
-  exStoryMemory: 'fresh',
-  exBreakthrough: 'fresh',
-  exNpcWatch: 'fresh',
+  exPlotTwist: 'carried',
+  exStoryMemory: 'carried',
+  exBreakthrough: 'carried',
+  exNpcWatch: 'carried',
   tallies: 'carried',
   date: 'fresh',
   time: 'fresh',

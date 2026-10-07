@@ -1,5 +1,6 @@
 import type { Character, GameHistory, SceneLine, StructuredRequest, TimeSlot } from './types'
 import { READER_SPEAKER } from './types'
+import { normalizeTermOrigin, type TermOrigin } from './termOrigin'
 
 export const STORY_MEMORY_BUDGET = 18000
 export const STORY_FACT_LIMIT = 3000
@@ -30,6 +31,15 @@ export interface StoryFact {
   supersedes: string[]
   manual: boolean
   batch?: string
+  origin?: TermOrigin
+}
+export interface PastEncounter {
+  id: string
+  date: number
+  time: TimeSlot
+  text: string
+  subjects: string[]
+  origin: TermOrigin
 }
 export interface StoryMemory {
   version: 1
@@ -38,6 +48,9 @@ export interface StoryMemory {
   hidden: string[]
   encounterSubjects: Record<string, string[]>
   encounterEdits: Record<string, { text?: string; hidden?: boolean }>
+  /** Recaps from completed semesters, separate from the active semester's history. */
+  pastEncounters?: PastEncounter[]
+  names?: Record<string, string>
 }
 export interface StoryRecord extends Omit<StoryFact, 'category' | 'manual'> {
   kind: 'fact' | 'encounter'
@@ -70,13 +83,13 @@ export const storyText = (x: unknown, max = 800): string =>
 const safeKey = (x: unknown): x is string =>
   typeof x === 'string' &&
   x.length > 0 &&
-  x.length <= 200 &&
+  (x.length <= 200 || (/^term:\d{1,4}:/.test(x) && x.length <= 210)) &&
   !['__proto__', 'constructor', 'prototype'].includes(x)
 const ids = (x: unknown): string[] =>
   Array.isArray(x) ? [...new Set(x.filter(safeKey))].slice(0, 100) : []
 const stamped = (x: Record<string, unknown>): boolean =>
   Number.isSafeInteger(x.date) &&
-  Number(x.date) >= 0 &&
+  Number(x.date) >= -100000 &&
   Number(x.date) <= 100000 &&
   (x.time === 0 || x.time === 1)
 export const storySlot = (date: number, time: number): number => date * 2 + time
@@ -109,6 +122,7 @@ const normalizeFact = (value: unknown): StoryFact | null => {
     source: storyText(f.source, 12000),
     supersedes: ids(f.supersedes),
     manual: f.manual === true,
+    ...(normalizeTermOrigin(f.origin) ? { origin: normalizeTermOrigin(f.origin) } : {}),
     ...(safeKey(f.batch) ? { batch: f.batch } : {})
   }
 }
@@ -138,15 +152,47 @@ export function normalizeStoryMemory(value: unknown): StoryMemory {
     if (f) edits[id] = f
   }
   for (const [id, raw] of Object.entries(object(s.encounterSubjects)).slice(-10000))
-    if (/^encounter:\d+:([01])$/.test(id)) encounterSubjects[id] = ids(raw)
+    if (/^(?:term:\d+:)?encounter:\d+:([01])$/.test(id)) encounterSubjects[id] = ids(raw)
   for (const [id, raw] of Object.entries(object(s.encounterEdits)).slice(-10000)) {
-    if (!/^encounter:\d+:([01])$/.test(id)) continue
+    if (!/^(?:term:\d+:)?encounter:\d+:([01])$/.test(id)) continue
     const e = object(raw)
     encounterEdits[id] = {
       ...(e.hidden === true ? { hidden: true } : {}),
       ...(storyText(e.text, 12000) ? { text: storyText(e.text, 12000) } : {})
     }
   }
+  const pastEncounters: PastEncounter[] = [],
+    names: Record<string, string> = {}
+  let archiveSize = 0
+  const seen = new Set<string>()
+  for (const raw of (Array.isArray(s.pastEncounters) ? s.pastEncounters : []).slice(-10000)) {
+    const e = object(raw),
+      origin = normalizeTermOrigin(e.origin),
+      text = storyText(e.text, 12000)
+    if (
+      !origin ||
+      !safeKey(e.id) ||
+      !/^term:\d+:encounter:\d+:[01]$/.test(e.id) ||
+      seen.has(e.id) ||
+      !stamped(e) ||
+      Number(e.date) >= 0 ||
+      !text
+    )
+      continue
+    archiveSize += text.length
+    if (archiveSize > 20 * 1024 * 1024) break
+    seen.add(e.id)
+    pastEncounters.push({
+      id: e.id,
+      date: Number(e.date),
+      time: e.time as TimeSlot,
+      text,
+      subjects: ids(e.subjects),
+      origin
+    })
+  }
+  for (const [id, name] of Object.entries(object(s.names)).slice(-512))
+    if (safeKey(id) && storyText(name, 200)) names[id] = storyText(name, 200)
   return {
     version: 1,
     facts: [...facts.values()],
@@ -155,7 +201,9 @@ export function normalizeStoryMemory(value: unknown): StoryMemory {
       ? [...new Set(s.hidden.filter(safeKey))].slice(-STORY_FACT_LIMIT)
       : [],
     encounterSubjects,
-    encounterEdits
+    encounterEdits,
+    ...(pastEncounters.length ? { pastEncounters } : {}),
+    ...(Object.keys(names).length ? { names } : {})
   }
 }
 export interface StorySource {
@@ -171,53 +219,81 @@ export function storySnapshot(game: StorySource): StorySnapshot | undefined {
   if (!game.playthroughId || !/^\d{1,20}$/.test(game.playthroughId)) return undefined
   const store = normalizeStoryMemory(game.exStoryMemory),
     characters = Object.values(game.characters)
-  const names = Object.fromEntries([
-    ['reader', 'The reader'],
-    ...characters.map((c) => [c.charId, `${c.firstName} ${c.lastName}`.trim()])
-  ])
+  const currentNames: Record<string, string> = Object.fromEntries(
+    characters.map((c) => [c.charId, `${c.firstName} ${c.lastName}`.trim().slice(0, 200)])
+  )
+  const names: Record<string, string> = Object.fromEntries(
+    [
+      ...Object.entries(store.names ?? {}).filter(
+        ([id]) => id !== 'reader' && !Object.hasOwn(currentNames, id)
+      ),
+      ...Object.entries(currentNames),
+      ['reader', 'The reader']
+    ].slice(-513)
+  )
   const records: StoryRecord[] = [],
     now = storySlot(game.date, game.time)
-  for (const [day, slots] of Object.entries(game.history))
+  const encounters: (Omit<PastEncounter, 'origin'> & { origin?: TermOrigin })[] = [
+    ...(store.pastEncounters ?? [])
+  ]
+  for (const [day, slots] of Object.entries(game.history ?? {}))
     for (const [time, value] of Object.entries(slots ?? {})) {
-      if (!/^\d+$/.test(day) || !['0', '1'].includes(time) || storySlot(+day, +time) > now) continue
-      const id = `encounter:${day}:${time}`,
-        edit = store.encounterEdits[id],
-        text = storyText(edit?.text ?? value, 12000)
-      if (!text || edit?.hidden) continue
-      const words = text.toLocaleLowerCase().split(/[^\p{L}\p{N}_]+/u)
-      const subjects =
-        store.encounterSubjects[id] ??
-        characters
-          .filter(
-            (c) =>
-              text.toLocaleLowerCase().includes(names[c.charId].toLocaleLowerCase()) ||
-              (characters.filter(
-                (other) => other.firstName.toLocaleLowerCase() === c.firstName.toLocaleLowerCase()
-              ).length === 1 &&
-                words.includes(c.firstName.toLocaleLowerCase()))
-          )
-          .map((c) => c.charId)
-      records.push({
-        id,
-        kind: 'encounter',
-        subjects,
-        subject: 'reader',
-        text,
+      if (!/^\d+$/.test(day) || !['0', '1'].includes(time) || storySlot(+day, +time) > now)
+        continue
+      encounters.push({
+        id: `encounter:${day}:${time}`,
         date: +day,
         time: +time as TimeSlot,
-        timeline: 'unspecified',
-        certainty: 'event',
-        claimant: null,
-        knownBy: [],
-        public: false,
-        evidence: '',
-        supersedes: [],
-        source: edit
-          ? 'Player-corrected recall; original history retained'
-          : 'Saved encounter summary',
-        manual: !!edit
+        text: storyText(value, 12000),
+        subjects: []
       })
     }
+  for (const entry of encounters) {
+    const day = entry.date,
+      time = entry.time,
+      value = entry.text
+    const id = entry.id,
+      edit = store.encounterEdits[id],
+      text = storyText(edit?.text ?? value, 12000)
+    if (!text || edit?.hidden) continue
+    const words = text.toLocaleLowerCase().split(/[^\p{L}\p{N}_]+/u)
+    const subjects =
+      store.encounterSubjects[id] ??
+      (entry.origin
+        ? entry.subjects
+        : characters
+            .filter(
+              (c) =>
+                text.toLocaleLowerCase().includes(currentNames[c.charId].toLocaleLowerCase()) ||
+                (characters.filter(
+                  (other) =>
+                    other.firstName.toLocaleLowerCase() === c.firstName.toLocaleLowerCase()
+                ).length === 1 &&
+                  words.includes(c.firstName.toLocaleLowerCase()))
+            )
+            .map((c) => c.charId))
+    records.push({
+      id,
+      kind: 'encounter',
+      subjects,
+      subject: 'reader',
+      text,
+      date: +day,
+      time: +time as TimeSlot,
+      timeline: 'unspecified',
+      certainty: 'event',
+      claimant: null,
+      knownBy: [],
+      public: false,
+      evidence: '',
+      supersedes: [],
+      source: edit
+        ? 'Player-corrected recall; original history retained'
+        : 'Saved encounter summary',
+      manual: !!edit,
+      ...(entry.origin ? { origin: entry.origin } : {})
+    })
+  }
   const hidden = new Set(store.hidden)
   const facts = store.facts
     .map((f) => store.edits[f.id] ?? f)
@@ -317,7 +393,9 @@ export function selectStoryRecords(
   }
   records
     .filter((r) => r.kind === 'fact' && relevantStoryFact(r, cast))
-    .sort((a, b) => Number(!!b.manual) - Number(!!a.manual) || score(b) - score(a) || recent(a, b))
+    .sort(
+      (a, b) => Number(!!b.manual) - Number(!!a.manual) || score(b) - score(a) || recent(a, b)
+    )
     .forEach(add)
   const encounters = records.filter((r) => r.kind === 'encounter').sort(recent)
   for (let i = 0; i < 2; i++)
@@ -346,6 +424,7 @@ export function formatStoryRecall(
         kind: r.kind,
         day: r.date,
         time: r.time,
+        ...(r.origin ? { originalSemester: r.origin.term + 1, originalDay: r.origin.day } : {}),
         timeline: r.timeline,
         certainty: r.certainty,
         subject: name(r.subject),
@@ -378,6 +457,7 @@ export function assertStoryRecall(value: unknown): asserts value is StoryRecallR
   if (
     !/^\d{1,20}$/.test(String(p.playthroughId)) ||
     !stamped(p) ||
+    Number(p.date) < 0 ||
     !Array.isArray(p.records) ||
     p.records.length > 10000 ||
     !Array.isArray(p.cast) ||
@@ -403,6 +483,7 @@ export function assertStoryRecall(value: unknown): asserts value is StoryRecallR
       typeof r.text !== 'string' ||
       r.text.length > 12000 ||
       !stamped(r) ||
+      (r.origin !== undefined && !normalizeTermOrigin(r.origin)) ||
       storySlot(Number(r.date), Number(r.time)) > storySlot(Number(p.date), Number(p.time)) ||
       !safeKey(r.subject) ||
       !Array.isArray(r.subjects) ||

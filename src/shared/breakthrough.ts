@@ -1,4 +1,5 @@
 import type { CharInfo, SceneLine, TimeSlot } from './types'
+import { normalizeTermOrigin, type TermOrigin } from './termOrigin'
 
 export const BREAKTHROUGH_MOD = 'breakthrough'
 export const SPIRIT_MAX = 100
@@ -20,6 +21,7 @@ export interface BreakthroughMoment {
   outcome: string
   transcriptStart?: number
   transcriptCount?: number
+  origin?: TermOrigin
 }
 
 export interface BreakthroughState {
@@ -57,10 +59,14 @@ export function normalizeBreakthrough(value?: unknown, recover = false): Breakth
     if (!safeId(charId) || !Array.isArray(entries)) continue
     moments[charId] = entries.slice(-6).flatMap(value => {
       const e = record(value)
-      if (!safeId(e.id) || !slot(e.date,e.time) || typeof e.outcome !== 'string' || !e.outcome.trim()) return []
+      const origin = normalizeTermOrigin(e.origin)
+      const archived = origin && Number.isSafeInteger(e.date) && Number(e.date) >= -100000 &&
+        Number(e.date) < 0 && (e.time === 0 || e.time === 1)
+      if (!safeId(e.id) || !(slot(e.date,e.time) || archived) || typeof e.outcome !== 'string' || !e.outcome.trim()) return []
       const range = Number.isSafeInteger(e.transcriptStart) && (e.transcriptStart as number) >= 0 &&
         Number.isSafeInteger(e.transcriptCount) && (e.transcriptCount as number) > 0
       return [{ id:e.id, date:e.date as number, time:e.time as TimeSlot, outcome:e.outcome.slice(0,12000),
+        ...(origin ? { origin } : {}),
         ...(range ? { transcriptStart:e.transcriptStart as number, transcriptCount:e.transcriptCount as number } : {}) }]
     })
   }
@@ -120,5 +126,6 @@ export function reconcileBreakthrough(
 export function breakthroughFacts(state: BreakthroughState, ids: readonly string[], date: number, time: TimeSlot) {
   return [...new Set(ids)].flatMap(charId => (state.moments[charId] ?? [])
     .filter(e => e.date < date || e.date === date && e.time <= time)
-    .slice(-3).map(e => ({ id:e.id, charId, date:e.date, time:e.time, outcome:e.outcome.slice(0,6000) })))
+    .slice(-3).map(e => ({ id:e.id, charId, date:e.date, time:e.time, outcome:e.outcome.slice(0,6000),
+      ...(e.origin ? { originalSemester: e.origin.term + 1, originalDay: e.origin.day } : {}) })))
 }
