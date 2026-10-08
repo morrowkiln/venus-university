@@ -1,5 +1,4 @@
-import { MEANWHILE_MOD } from '@shared/meanwhile'
-import { MeanwhileModal } from './MeanwhileModal'
+import { startWhisperDelivery } from '../stores/whisperDelivery'
 import { StoryMemoryModal } from './StoryMemoryModal'
 import { modIsOn } from '../stores/modsStore'
 import {
@@ -224,7 +223,6 @@ function turnDismissLabel(error: AppError): string {
 /** What is open over the scene, if anything. */
 type OpenPanel =
   | { kind: 'calendar' }
-  | { kind: 'meanwhile' }
   | { kind: 'map' }
   | { kind: 'jobs' }
   | { kind: 'classes' }
@@ -528,6 +526,7 @@ function InterruptEndingModal({
 
 /** Game View: renders `gameStore`; `gameLoop.ts` owns state changes. */
 export function GameView(): JSX.Element {
+  useEffect(() => startWhisperDelivery(), [])
   const plotTwistOn = useModOn(PLOT_TWIST_MOD)
   const bg = useGameStore((s) => s.bg)
   const time = useGameStore((s) => s.time)
@@ -632,7 +631,6 @@ export function GameView(): JSX.Element {
 
   const [action, setAction] = useState('')
   const [panel, setPanel] = useState<OpenPanel | null>(null)
-  const meanwhileOn = useModOn(MEANWHILE_MOD)
   const closePanel = (): void => setPanel(null)
   /**
    * The glyphs a gift threw off her, until the last of them has faded. Armed `waiting` when the
@@ -2436,7 +2434,6 @@ export function GameView(): JSX.Element {
             onStoryMemory={modIsOn('story-memory') ? () => setPanel({ kind: 'storyMemory' }) : undefined}
             onMods={() => setPanel({ kind: 'mods' })}
             onPlotTwist={plotTwistOn ? () => setPanel({ kind: 'plotTwist' }) : undefined}
-            onMeanwhile={meanwhileOn ? () => setPanel({ kind: 'meanwhile' }) : undefined}
             modsWaiting={busy}
             onControls={() => setPanel({ kind: 'controls' })}
             onLeave={() => setPanel({ kind: 'leaving' })}
@@ -2445,9 +2442,6 @@ export function GameView(): JSX.Element {
           />
         )}
 
-        {panel?.kind === 'meanwhile' && meanwhileOn && (
-          <MeanwhileModal key="meanwhile" theme={half} onClose={() => setPanel({kind:'settings'})} />
-        )}
         {panel?.kind === 'saveGame' && (
           <SaveGameModal key="save-game" theme={half} onClose={closePanel} />
         )}

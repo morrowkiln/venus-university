@@ -1,3 +1,9 @@
+import { MEANWHILE_MOD } from '@shared/meanwhile'
+import { VENUS_WHISPER_MOD, whisperHasUnread } from '@shared/venusWhisper'
+import { useModOn } from '../stores/modsStore'
+import { MeanwhileIcon, WhisperIcon } from '../components/BunnyboardFeatureIcons'
+import { MeanwhilePage } from './MeanwhileModal'
+import { VenusWhisperPage } from './VenusWhisperModal'
 import {
   Fragment,
   memo,
@@ -242,13 +248,15 @@ function PhotosIcon(): JSX.Element {
   )
 }
 
-/** The five destinations, in rail order. */
+/** Native destinations followed by the independently enabled campus pages. */
 const TABS: ReadonlyArray<{ id: BunnyboardTab; word: string; Mark: () => JSX.Element }> = [
   { id: 'chats', word: 'CHATS', Mark: ChatsIcon },
   { id: 'friends', word: 'FRIENDS', Mark: FriendsIcon },
   { id: 'updates', word: 'UPDATES', Mark: UpdatesIcon },
   { id: 'profile', word: 'PROFILE', Mark: ProfileIcon },
-  { id: 'photos', word: 'PHOTOS', Mark: PhotosIcon }
+  { id: 'photos', word: 'PHOTOS', Mark: PhotosIcon },
+  { id: 'meanwhile', word: 'MEANWHILE', Mark: MeanwhileIcon },
+  { id: 'whisper', word: 'WHISPER', Mark: WhisperIcon }
 ]
 
 /** The composer's quick-bar: one tap each, short enough to sit under the field unwrapped. */
@@ -273,7 +281,11 @@ export function BunnyboardModal({
   onChangeSchedule,
   onOpenJobs
 }: BunnyboardModalProps): JSX.Element | null {
-  const tab = useBunnyboardStore((s) => s.tab)
+  const storedTab = useBunnyboardStore((s) => s.tab)
+  const whisperUnread = useGameStore(s => whisperHasUnread(s.exVenusWhisper, s.termIndex, s.date))
+  const meanwhileOn = useModOn(MEANWHILE_MOD), whisperOn = useModOn(VENUS_WHISPER_MOD)
+  const tabs = TABS.filter(t => (t.id !== 'meanwhile' || meanwhileOn) && (t.id !== 'whisper' || whisperOn))
+  const tab = tabs.some(t => t.id === storedTab) ? storedTab : 'chats'
   const viewingCharId = useBunnyboardStore((s) => s.viewingCharId)
   const pageCharId = useBunnyboardStore((s) => s.pageCharId)
   const setTab = useBunnyboardStore((s) => s.setTab)
@@ -282,6 +294,9 @@ export function BunnyboardModal({
   const profilePicture = useGameStore((s) => s.profilePicture)
   const hiddenOf = useHiddenThreads()
   const backToList = useBunnyboardStore((s) => s.backToList)
+
+  // A disabled page unmounts immediately, cancelling its requests and returning to Chats.
+  useEffect(() => { if (storedTab !== tab) setTab(tab) }, [storedTab, tab, setTab])
 
   // A hidden thread's unread stays off the badge.
   const chatsBadge = Object.values(bunnyboard.conversations).reduce(
@@ -325,11 +340,12 @@ export function BunnyboardModal({
       ) : (
         <div className="vu-bb" role="dialog" aria-modal="true" aria-label="Bunnyboard">
           <LettersFilter id="vu-bb-letters" inkClassName="vu-bb-letters-ink" />
-          <motion.div className="vu-bb-rail" variants={RAIL_DEAL}>
+          <motion.div className={`vu-bb-rail${tabs.length > 5 ? ' vu-bb-rail--expanded' : ''}`} variants={RAIL_DEAL}>
             <motion.button
               className="vu-circle"
               type="button"
               aria-label="Close Bunnyboard"
+              style={tabs.length > 5 ? { marginLeft: tabs.length * 7 } : undefined}
               variants={dealtItem}
               disabled={Boolean(armed)}
               {...gestures(Boolean(armed), quietLift, quietPress)}
@@ -338,7 +354,7 @@ export function BunnyboardModal({
               <BackIcon />
             </motion.button>
 
-            {TABS.map((entry) => {
+            {tabs.map((entry, index) => {
               const on = entry.id === tab
               const badge =
                 entry.id === 'chats' ? chatsBadge : entry.id === 'friends' ? friendsBadge : 0
@@ -346,9 +362,10 @@ export function BunnyboardModal({
                 <motion.button
                   key={entry.id}
                   id={`bb-tab-${entry.id}`}
+                  style={tabs.length > 5 ? { marginLeft: (tabs.length - index - 1) * 7 } : undefined}
                   className={`vu-tile vu-bb-tile vu-paper${on ? ' vu-bb-tile--on' : ''}`}
                   type="button"
-                  aria-label={entry.word}
+                  aria-label={entry.id === 'whisper' && whisperUnread ? 'WHISPER · unread issues' : entry.word}
                   aria-pressed={on}
                   variants={dealtItem}
                   disabled={Boolean(armed)}
@@ -369,6 +386,7 @@ export function BunnyboardModal({
                   )}
                   <span className="vu-bb-tile-word">{entry.word}</span>
                   {badge > 0 && <span className="vu-tile-badge">{badge}</span>}
+                  {entry.id === 'whisper' && whisperUnread && <span className="vu-bb-unread-dot" aria-hidden="true"/>}
                 </motion.button>
               )
             })}
@@ -406,6 +424,8 @@ export function BunnyboardModal({
                 {tab === 'updates' && <UpdatesFeed />}
                 {tab === 'profile' && <ProfilePage />}
                 {tab === 'photos' && <PhotosPage theme={theme} />}
+                {tab === 'meanwhile' && <MeanwhilePage />}
+                {tab === 'whisper' && <VenusWhisperPage />}
               </div>
             </div>
           </motion.div>

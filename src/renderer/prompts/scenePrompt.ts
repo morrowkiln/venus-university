@@ -152,6 +152,7 @@ export interface PromptState {
   exPlotTwist?: string
   /** Supplied only while the independent Breakthrough mod is enabled. */
   breakthrough?: import('@shared/breakthrough').BreakthroughState
+  publicGossip?: string[]
   storyMemory?: StorySnapshot
   /** The cloud-LLM cache key: the playthrough id, never the save's. */
   playthroughId: string
@@ -1300,6 +1301,7 @@ function castScenePrompt(
       ...whoBlock(cast, state, reader),
       ...plotTwistBlock(state.exPlotTwist),
       ...nowBlock(cast, state),
+      ...(state.publicGossip ?? []),
       ...classBlock(state),
       ...lore,
       ...(state.breakthrough ? [breakthroughContinuity(state.breakthrough,cast,state.date,state.time)] : []),

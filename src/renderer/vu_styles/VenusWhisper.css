@@ -1,0 +1,43 @@
+.vu-whisper-meta { font: 12px var(--font-mono); letter-spacing: 1.4px; text-transform: uppercase; color: var(--vu-accent); }
+.vu-whisper-rail > button { align-self: flex-start; white-space: normal; }
+.vu-whisper-note { color: var(--vu-text-muted); font-size: 13px; line-height: 1.45; margin: 0; }
+.vu-whisper-archive { flex: 1; overflow: hidden auto; min-height: 0; padding: 4px 12px 12px 4px; }
+.vu-whisper-edition { display: flex; flex-direction: column; text-align: left; gap: 10px; width: 100%; border: 2px solid transparent; border-radius: 22px 0 0 22px; background: var(--vu-recessed); color: var(--vu-text); padding: 16px 15px; margin-bottom: 14px; }
+.vu-whisper-edition strong { font: 18px var(--font-display); line-height: 1.4; overflow-wrap: anywhere; }
+.vu-whisper-edition > span:last-child { color: var(--vu-text-muted); font: 12px var(--font-mono); }
+.vu-whisper-edition[aria-pressed=true] { border-color: var(--vu-accent); }
+.vu-whisper-reading { min-height: 0; min-width: 0; display: flex; flex-direction: column; }
+.vu-whisper-scroll { flex: 1; min-height: 0; overflow: hidden auto; padding: 0 15px 10px 6px; }
+.vu-whisper-article h2,.vu-whisper-welcome h2 { font: 32px var(--font-display); margin: 11px 0 17px; line-height: 1.2; overflow-wrap: anywhere; }
+.vu-whisper-copy { white-space: pre-wrap; font-size: 16px; line-height: 1.65; color: var(--vu-text-body); overflow-wrap: anywhere; }
+.vu-whisper-signature { text-align: right; color: var(--vu-accent); font-style: italic; font-size: 14px; margin: 20px 0 22px; }
+.vu-whisper-discussion { border-top: 3px double var(--vu-border); padding-top: 14px; }
+.vu-whisper-discussion h3 { font: 20px var(--font-display); margin: 0 0 16px; }
+.vu-whisper-discussion h3 span { color: var(--vu-text-muted); font: 13px var(--font-mono); margin-left: 12px; }
+.vu-whisper-comment { display: flex; gap: 13px; padding: 14px; margin-bottom: 12px; border-radius: 20px; background: var(--vu-recessed); }
+.vu-whisper-comment > div { min-width: 0; flex: 1; }
+.vu-whisper-avatar { position: relative; display: grid; place-items: center; width: 44px; height: 54px; flex: none; border-radius: 30px 30px 0 0; background: var(--vu-surface); color: var(--vu-accent); overflow: hidden; font: 25px var(--font-display); }
+.vu-whisper-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vu-whisper-byline { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.vu-whisper-byline span,.vu-whisper-reply-label { color: var(--vu-text-muted); font-size: 13px; overflow-wrap: anywhere; }
+.vu-whisper-reply-label { display: block; border-left: 2px solid var(--vu-border); padding-left: 10px; margin-top: 10px; }
+.vu-whisper-comment p { white-space: pre-wrap; line-height: 1.55; font-size: 14px; overflow-wrap: anywhere; margin: 10px 0; }
+.vu-whisper-welcome { padding: 34px 25px; color: var(--vu-text-body); font-size: 17px; line-height: 1.6; }
+.vu-whisper-welcome h2 { color: var(--vu-accent); }
+.vu-whisper-status { min-height: 27px; padding-top: 8px; color: var(--vu-text-muted); font: 12px var(--font-mono); }
+.vu-whisper-error { margin: 4px 0 12px; color: var(--vu-danger); font-size: 15px; }
+.vu-whisper-composer { padding: 12px 4px 4px; border-top: 2px solid var(--vu-border); }
+.vu-whisper-compose-top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; font-size: 14px; }
+.vu-whisper-tag { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.vu-whisper-tag select { max-width: 200px; padding: 7px 10px; border-radius: 14px; border: 2px solid var(--vu-border); background: var(--vu-ground); color: var(--vu-text); font: inherit; }
+.vu-whisper-composer textarea { display: block; width: 100%; height: 65px; min-height: 0; resize: none; border: 2px solid var(--vu-border); border-radius: 18px; padding: 10px 16px; background: var(--vu-ground); color: var(--vu-text); font: 14px var(--font-body); }
+.vu-whisper-compose-foot { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px 0 2px; }
+.vu-whisper-compose-foot span { font: 12px var(--font-mono); color: var(--vu-text-muted); }
+.vu-whisper-rail .vu-whisper-meta { font-size: 11px; letter-spacing: .5px; }
+.vu-whisper-byline strong { font-size: 14px; }
+.vu-whisper-comment .vu-pill { font-size: 11px; padding: 5px 12px; }
+.vu-whisper-rail > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.vu-whisper-rail > div:last-child .vu-btn { font-size: 13px; }
+
+.vu-whisper-delivery { font: 20px var(--font-display); color: var(--vu-accent); }
+.vu-whisper-unread { color: var(--vu-accent); font: 11px var(--font-mono); text-transform: uppercase; }

@@ -1,0 +1,21 @@
+/* Campus pages share the phone's surface, with scrolling confined to their reading wells. */
+.vu-bb-feature {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 35px 40px 34px 64px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.vu-bb-feature-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 0 12px 23px 0; flex: none; border-bottom: 3px double var(--vu-border); }
+.vu-bb-feature-heading h1 { font: 38px var(--font-display); margin: 7px 0 5px; }
+.vu-bb-feature-heading p { margin: 0; color: var(--vu-text-muted); font-size: 15px; font-style: italic; }
+.vu-bb-feature-seal { width: 64px; height: 64px; flex: none; border: 2px solid var(--vu-border); border-radius: 50%; display: grid; place-items: center; color: var(--vu-accent); rotate: 6deg; }
+.vu-bb-feature-seal svg { width: 36px; height: 36px; }
+.vu-bb-feature-columns { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 26px; flex: 1; min-height: 0; padding-top: 24px; }
+.vu-bb-feature-list { display: flex; flex-direction: column; gap: 16px; min-height: 0; min-width: 0; padding: 2px 12px 0 0; border-right: 1px solid var(--vu-border); }
+.vu-bb-feature-label { font: 11px var(--font-mono); letter-spacing: 1.8px; color: var(--vu-text-muted); text-transform: uppercase; }
+.vu-bb-feature .vu-btn { font-size: 16px; padding: 13px 23px; }

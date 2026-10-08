@@ -156,6 +156,13 @@ Where a thing goes:
 
 ## 5. Prompts and the LLM
 
+- **The Venus Whisper** is an optional public gossip column with one on-demand issue per day.
+  It uses recent public posts and public NPC encounter summaries, with a separate unprivileged
+  comment request. Its secret author and bounded archive live in `exVenusWhisper` and carry
+  through continued semesters even if the author leaves the roster. Scenes and texts receive
+  only a bounded, attributed public excerpt; private scenes and memories are never newsletter
+  sources, and rumors are not filed as confirmed facts. Publication uses the native save lane.
+
 - **Optional Story Memory** keeps lasting facts and recall corrections in `GameSave.exStoryMemory`.
   An enabled ledger extracts candidates backed by generated scene evidence; the slot boundary
   validates and files them. Pure builders attach a local snapshot, and the platform bridge

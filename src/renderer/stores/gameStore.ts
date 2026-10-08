@@ -1,3 +1,4 @@
+import { normalizeWhisper, type VenusWhisper } from '@shared/venusWhisper'
 import { normalizeMeanwhile, type MeanwhileStore } from '@shared/meanwhile'
 import { normalizeBreakthrough, reconcileBreakthrough, type BreakthroughState } from '@shared/breakthrough'
 import { normalizeStoryMemory, type StoryMemory } from '@shared/storyMemory'
@@ -284,6 +285,7 @@ interface GameStoreState {
   addedClasses: Record<string, AddedClass>
   /** What the roster thinks of each other, keyed by `pairKeyOf`. Persisted. */
   npcRelationships: NpcRelationshipMap
+  exVenusWhisper: VenusWhisper
   exNpcWatch: MeanwhileStore
   /** The first time each pair of them became friends, oldest first. Persisted. */
   npcFriendships: NpcFriendship[]
@@ -1294,6 +1296,7 @@ const initialState = {
   droppedClasses: {} as Record<string, DroppedClass>,
   addedClasses: {} as Record<string, AddedClass>,
   npcRelationships: {} as NpcRelationshipMap,
+  exVenusWhisper: normalizeWhisper(null),
   exNpcWatch: normalizeMeanwhile(null),
   npcFriendships: [] as NpcFriendship[],
   npcOverlay: null as NpcSlotOverlay | null,
@@ -1424,6 +1427,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       droppedClasses: save.droppedClasses,
       addedClasses: save.addedClasses,
       npcRelationships: save.npcRelationships,
+      exVenusWhisper: normalizeWhisper(save.exVenusWhisper),
       exNpcWatch: normalizeMeanwhile(save.exNpcWatch),
       npcFriendships: save.npcFriendships ?? [],
       npcOverlay: save.npcOverlay,
@@ -2677,6 +2681,7 @@ export const useGameStore = create<GameStoreState>((set, get) => ({
       droppedClasses: state.droppedClasses,
       addedClasses: state.addedClasses,
       npcRelationships: state.npcRelationships,
+      exVenusWhisper: normalizeWhisper(state.exVenusWhisper),
       exNpcWatch: normalizeMeanwhile(state.exNpcWatch),
       npcFriendships: state.npcFriendships,
       occasionsDeclined: state.occasionsDeclined,

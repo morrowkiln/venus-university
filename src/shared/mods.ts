@@ -1,3 +1,4 @@
+import { VENUS_WHISPER_MOD } from './venusWhisper'
 import { CONTINUING_SEMESTERS, CONTINUING_SEMESTERS_MOD } from './continuingSemestersMod'
 import { PHOTO_LOADERS, photoLoaderOf } from './photoLoader'
 import { loaderOptionId, PHOTO_FEATURE_MOD, type PhotoSwitches } from './photoSwitches'
@@ -121,6 +122,12 @@ export const MODS: readonly ModDef[] = [
     offNote: 'Keeps saved spirit and outcomes. Stops earning, activation, and extra continuity prompts.'
   },
   SOUNDTRACK_DEF,
+  {
+    id: VENUS_WHISPER_MOD, name: 'The Venus Whisper', author: 'Maestro Leeds', version: '1.0.0',
+    scope: 'anytime', defaultOn: true,
+    blurb: 'An anonymous Wednesday gossip column, delivered weekly with unread alerts, public comments, replies and mentions.',
+    offNote: 'Keeps the secret columnist and archive, including across continued semesters. Stops new issues, comments and gossip context.'
+  },
   {
     id: 'story-memory', name: 'Story Memory', author: 'maestromods', version: '1.0.0',
     scope: 'anytime', defaultOn: true,

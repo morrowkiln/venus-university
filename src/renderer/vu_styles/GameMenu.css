@@ -34,3 +34,12 @@
 .vu-menu-modal-actions > .vu-deadnote {
   transform-origin: left center;
 }
+
+/* A long mod-enabled menu uses panel-sized answers so its title and foot stay on stage. */
+.vu-menu-modal:has(.vu-menu-modal-actions > :nth-child(10)) .vu-menu-modal-actions {
+  gap: 12px;
+}
+.vu-menu-modal:has(.vu-menu-modal-actions > :nth-child(10)) .vu-menu-modal-actions .vu-btn {
+  padding: 14px 30px 14px 24px;
+  font-size: 19px;
+}

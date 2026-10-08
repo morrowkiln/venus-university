@@ -257,3 +257,5 @@ index, optional save data, editor, prompt budgets and integration with the other
 - Whether `data/mods.json` goes into the game's own backup; it does not today.
 - How a mod that patches the built code, rather than the source, reads its switch.
 - Whether hook points go into the framework, and which ones.
+
+The Venus Whisper's newsletter, anonymity boundary, save shape and integration points are documented in [docs/mods/venus-whisper.md](docs/mods/venus-whisper.md).

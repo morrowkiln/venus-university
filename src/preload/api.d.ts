@@ -1,3 +1,4 @@
+import type { WhisperDraft, WhisperReply } from '../shared/venusWhisper'
 import type { MeanwhileResponse } from '../shared/meanwhile'
 import type { StoryRecallRequest, StoryRecall } from '@shared/storyMemory'
 import type { ClassifierPromptRequest, ClassifierVerdict } from '@shared/classifier'
@@ -173,6 +174,7 @@ export interface VenusUniversityApi {
       group: string
     ) => Promise<Result<EndingPostsResponse>>
     /** Writes a bounded, noncanonical spectator conversation; never streams. */
+    completeWhisper: (request: StructuredRequest, group: string) => Promise<Result<WhisperDraft | WhisperReply>>
     completeMeanwhile: (request: StructuredRequest, group: string) => Promise<Result<MeanwhileResponse>>
     /** Sends a Bunnyboard texting turn; `group` enables cancellation. */
     completeTexting: (

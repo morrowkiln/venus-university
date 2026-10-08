@@ -72,6 +72,7 @@ export interface TextingPromptState {
   historyLimit?: number
   /** Supplied only while the standalone Breakthrough mod is enabled. */
   breakthrough?: BreakthroughState
+  publicGossip?: string[]
   storyMemory?: StorySnapshot
   date: number
   time: TimeSlot
@@ -390,6 +391,7 @@ export function buildTextingPrompt(
     'Stay in her voice and keep it text-length: this is a phone thread, not prose.',
     ...meetUpLines(name, state.charLocation, state.charHaunt, state.time, away),
     '',
+    ...(state.publicGossip ?? []),
     ...promptLines('dm', { character, info, state }),
     'BLOCKING',
     `Set "blocked" to true only if these texts have pushed ${name} to cut the reader off completely. She is done, and blocks him on Bunnyboard as her last text lands.`,

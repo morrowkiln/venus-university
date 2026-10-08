@@ -1,3 +1,4 @@
+import { VENUS_WHISPER_MOD, whisperRecall } from '@shared/venusWhisper'
 import { BREAKTHROUGH_MOD } from '@shared/breakthrough'
 import { currentStorySnapshot } from './storyMemory'
 /**
@@ -469,6 +470,7 @@ export async function sendMessage(charId: string, text: string): Promise<void> {
       {
         date: game.date,
         time: game.time,
+        publicGossip: modIsOn(VENUS_WHISPER_MOD) ? whisperRecall(game.exVenusWhisper, game.termIndex, game.date, [charId]) : [],
         storyMemory: currentStorySnapshot(),
         stats: game.stats,
         breakthrough: modIsOn(BREAKTHROUGH_MOD) ? game.exBreakthrough : undefined,
@@ -650,6 +652,7 @@ export async function regenerateTextReply(charId: string, commit: (
       playerSchedule: game.playerSchedule, playerJob: game.job, occasions: game.occasions,
       weather: game.weather, charLocation: charHiddenLocationNow(charId), charCompanions: companionsOf(charId),
       charHaunt: charStandingHauntNow(charId), springBreakAway: game.springBreakAway,
+      publicGossip: modIsOn(VENUS_WHISPER_MOD) ? whisperRecall(game.exVenusWhisper, game.termIndex, game.date, [charId]) : [],
       // As a normal reply has it, per the Breakthrough port's integration note.
       breakthrough: modIsOn(BREAKTHROUGH_MOD) ? game.exBreakthrough : undefined,
       memoryBudget: memoryBudgetsOf(useSettingsStore.getState().settings ?? {}).one,

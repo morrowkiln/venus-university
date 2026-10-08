@@ -1,3 +1,4 @@
+import { VENUS_WHISPER_MOD, whisperRecall } from '@shared/venusWhisper'
 import { slotFullLabel } from '@shared/classes'
 import { graduatesNow, readerGraduatesNow } from '@shared/term'
 import { activePlotTwist, PLOT_TWIST_MOD } from '@shared/plotTwists'
@@ -342,6 +343,7 @@ export function promptState(): PromptState {
     : null
 
   return {
+    publicGossip: modIsOn(VENUS_WHISPER_MOD) ? whisperRecall(game.exVenusWhisper, game.termIndex, game.date, game.cast) : [],
     storyMemory: currentStorySnapshot(),
     playthroughId: game.playthroughId ?? 'unsaved',
     exPlotTwist: activePlotTwist(game.exPlotTwist, modIsOn(PLOT_TWIST_MOD)),

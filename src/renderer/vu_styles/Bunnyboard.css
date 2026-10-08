@@ -1,4 +1,4 @@
-/* The Bunnyboard: the campus messaging app, its three tabs and the phone they are read on.
+/* The Bunnyboard: the campus messaging app, its tabs and the phone they are read on.
    The veil, row, tile, buttons and fields are base.css's. The panel is the app's own mark at
    stage scale — a half-pill body under two half-pill ears, mirrored to the flat every other
    surface wears. */
@@ -82,6 +82,10 @@
 }
 
 /* ---- the phone ------------------------------------------------------------ */
+
+/* Optional pages keep the full rail on stage; the component spaces the diagonal by count. */
+.vu-bb-rail--expanded { gap: 12px; }
+.vu-bb-rail--expanded .vu-bb-tile-word { letter-spacing: 0; }
 
 .vu-bb-phone {
   position: relative;
@@ -1144,3 +1148,7 @@
   height: 36px;
   overflow: hidden;
 }
+
+/* One unread edition is enough to mark the newspaper; its archive holds the individual states. */
+.vu-bb-unread-dot { position: absolute; top: -4px; right: -4px; width: 17px; height: 17px; border-radius: 50%; background: var(--vu-accent); border: 3px solid var(--vu-surface); }
+.vu-bb-tile--on .vu-bb-unread-dot { background: var(--vu-accent-ink); border-color: var(--vu-accent); }

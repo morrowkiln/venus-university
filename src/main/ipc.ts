@@ -1,3 +1,4 @@
+import type { WhisperDraft, WhisperReply } from '@shared/venusWhisper'
 import type { MeanwhileResponse } from '@shared/meanwhile'
 import { prepareStoryRequest, inspectStoryMemory } from './services/storyMemoryService'
 import type { StoryRecallRequest } from '@shared/storyMemory'
@@ -372,6 +373,10 @@ export function registerIpcHandlers(): void {
   // The epilogue's status updates: one call for the whole week after graduation.
   handle('llm:completeEndingPosts', (_event, request: StructuredRequest, group: string) =>
     runAbortable(group, (signal) => completeStructured<EndingPostsResponse>(request, signal))
+  )
+
+  handle('llm:completeWhisper', (_event, request: StructuredRequest, group: string) =>
+    runAbortable(group, signal => completeStructured<WhisperDraft | WhisperReply>(request, signal))
   )
 
   handle('llm:completeMeanwhile', (_event, request: StructuredRequest, group: string) =>

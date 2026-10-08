@@ -1,19 +1,23 @@
-.vu-meanwhile { --paper-offset: 12px 11px; --paper-shadow: var(--vu-panel-shadow); display:flex; flex-direction:column; gap:18px; width:min(1240px,100% - 100px); height:790px; max-height:calc(100% - 100px); padding:76px 36px 30px 56px; border-radius:90px 0 0 90px; color:var(--vu-text); font-family:var(--font-body); }
-.vu-meanwhile-note { margin:0; color:var(--vu-text-muted); font-size:15px; line-height:1.4; }
-.vu-meanwhile-body { display:flex; gap:24px; min-height:0; flex:1; }
-.vu-meanwhile-events { width:32%; min-width:230px; overflow:hidden auto; padding:6px 16px 6px 0; }
-.vu-meanwhile-event { display:flex; flex-direction:column; gap:9px; text-align:left; width:100%; margin:0 0 12px; padding:16px; border:2px solid transparent; border-radius:24px 0 0 24px; background:var(--vu-recessed); color:var(--vu-text); font:16px var(--font-body); cursor:pointer; }
-.vu-meanwhile-event[aria-pressed=true] { border-color:var(--vu-accent); }
-.vu-meanwhile-event span,.vu-meanwhile-event small { color:var(--vu-text-muted); font-size:13px; }
-.vu-meanwhile-event:disabled { opacity:.55; cursor:default; }
-.vu-meanwhile-view { display:flex; flex-direction:column; flex:1; min-width:0; min-height:0; overflow:hidden; background:var(--vu-recessed); border-radius:28px 0 0 28px; }
-.vu-meanwhile-backdrop { width:100%; height:170px; object-fit:cover; flex:none; }
-.vu-meanwhile-story { flex:1; min-height:0; overflow:auto; padding:22px; }
-.vu-meanwhile-story h3 { font:24px var(--font-display); margin:0 0 8px; }
-.vu-meanwhile-story p { margin:0 0 16px; line-height:1.5; overflow-wrap:anywhere; }
-.vu-meanwhile-line { display:flex; gap:16px; margin-top:24px; }
-.vu-meanwhile-line img { width:66px; height:76px; border-radius:40px 40px 0 0; object-fit:cover; flex:none; background:var(--vu-surface); }
-.vu-meanwhile-line p { font-size:21px; margin-top:8px; }
-.vu-meanwhile-controls { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px; }
-.vu-meanwhile-controls span { color:var(--vu-text-muted); font:13px var(--font-mono); }
-.vu-meanwhile .vu-foot { flex:none; align-items:center; justify-content:space-between; }
+.vu-meanwhile-note { margin: 0; color: var(--vu-text-muted); font-size: 13px; line-height: 1.5; }
+.vu-meanwhile-events { flex: 1; min-height: 0; overflow: hidden auto; padding: 6px 12px 12px 4px; }
+.vu-meanwhile-event { display: flex; flex-direction: column; gap: 9px; text-align: left; width: 100%; margin: 0 0 14px; padding: 16px 15px; border: 2px solid transparent; border-radius: 22px 0 0 22px; background: var(--vu-recessed); color: var(--vu-text); cursor: pointer; overflow-wrap: anywhere; }
+.vu-meanwhile-event strong { font: 18px/1.4 var(--font-display); }
+.vu-meanwhile-event[aria-pressed=true] { border-color: var(--vu-accent); }
+.vu-meanwhile-event span,.vu-meanwhile-event small { color: var(--vu-text-muted); font: 11px/1.5 var(--font-mono); }
+.vu-meanwhile-event:disabled { opacity: .55; cursor: default; }
+.vu-meanwhile-view { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.vu-meanwhile-scene { position: relative; flex: 1; min-height: 0; overflow: hidden; background: var(--vu-recessed); border-radius: 28px 0 0 28px; }
+.vu-meanwhile-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.vu-meanwhile-story { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 24px; padding: 24px; overflow: hidden auto; }
+.vu-meanwhile-scene-heading { flex: none; padding: 18px 20px; border-radius: 22px 0 0 22px; background: var(--vu-ground); }
+.vu-meanwhile-scene-heading h2 { font: 30px/1.3 var(--font-display); margin: 0 0 8px; overflow-wrap: anywhere; }
+.vu-meanwhile-scene-heading p { margin: 0; font-size: 13px; line-height: 1.5; color: var(--vu-text-muted); }
+.vu-meanwhile-message { padding: 20px; background: var(--vu-ground); border-radius: 22px 0 0 22px; overflow-wrap: anywhere; }
+.vu-meanwhile-line { display: flex; gap: 18px; flex: none; margin-top: auto; padding: 23px; border-radius: 24px 0 0 24px; background: var(--vu-ground); box-shadow: 8px 8px 0 var(--vu-panel-shadow); }
+.vu-meanwhile-line img { width: 61px; height: 78px; border-radius: 40px 40px 0 0; object-fit: cover; flex: none; background: var(--vu-surface); }
+.vu-meanwhile-line > div { min-width: 0; }
+.vu-meanwhile-line strong { color: var(--vu-accent); font: 19px var(--font-display); }
+.vu-meanwhile-line p { font-size: 17px; line-height: 1.6; margin: 8px 0 0; overflow-wrap: anywhere; }
+.vu-meanwhile-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 22px; flex: none; }
+.vu-meanwhile-controls span { color: var(--vu-text-muted); font: 13px var(--font-mono); }
+.vu-meanwhile-spectator { font: 11px var(--font-mono); color: var(--vu-text-muted); text-align: center; margin: 19px 0 0; }

@@ -1,9 +1,24 @@
 # Meanwhile conversations source port
 
-Meanwhile is an independent, anytime switch in Mods. When enabled, the in-game Menu
-has a **Meanwhile…** entry. Character profiles are unchanged. Select a recent encounter
+Meanwhile is an independent, anytime switch in Mods. When enabled, Bunnyboard
+has a **Meanwhile** tab. Character profiles are unchanged. Select a recent encounter
 to watch two NPCs talk, then use Previous and Next to read it. There is no player input,
 time advance, relationship reward, or new scene added to the player's history.
+
+Location IDs are translated to their actual background filenames (for example, Eastern
+Buffet uses `asian_food`). Installed City Life artwork is supported for `bowling_alley`,
+`roller_rink`, and `cat_cafe`, without requiring City Life for native locations. Encounters
+have no time/weather stamp, so the viewer uses day artwork. Missing art leaves a themed
+background; switching to valid art resets a failed image's visibility. Portraits refresh
+when their character assets become available. Generation displays **Loading their conversation…**.
+
+Class encounters use their captured course title and matching course category to choose
+activity-appropriate existing art: PE uses the gym by default, swimming the pool, strength
+training the weight room, running the track, and practical cooking/art/music/lab classes
+their respective rooms. Rock climbing uses the gym because no climbing-wall background
+ships with the game. Optional bowling/rink art falls back to the gym if unavailable. Cached
+replays receive this fix immediately; a later semester reusing a course code cannot substitute
+its new course's category for an old replay with a different title. No additional AI call is used.
 
 ## Where encounters come from
 
@@ -26,7 +41,7 @@ relationship memories, or Story Memory retrieval. The response must contain 6–
 both participants must speak, and each line is limited to 400 characters.
 
 Invalid responses and failed saves leave the cache unchanged and offer Retry. Leaving
-the viewer cancels its request. Before entering the native save queue, the request checks
+the viewer, changing tabs, or disabling the mod cancels its request. Before entering the native save queue, the request checks
 the active playthrough, load counter, date, time, mod switch, and event. A disk write that
 has already begun may finish after closing; it only stores the optional replay. Its result
 will not update a different active game. No AI request is made when the mod is disabled.
@@ -39,9 +54,10 @@ will not update a different active game. No AI request is made when the mod is d
 | `src/renderer/prompts/meanwhilePrompt.ts` | Small two-person request and structured response schema. |
 | `src/renderer/stores/meanwhile.ts` | Generation, stale-request checks, replay reuse. |
 | `src/renderer/stores/loop/saves.ts` | `persistMeanwhileScene`, using the existing serialized save queue. |
-| `src/renderer/views/MeanwhileModal.tsx` | Dedicated read-only viewer, cancellation, retry, navigation. |
+| `src/renderer/views/MeanwhileModal.tsx` | Embedded read-only Bunnyboard page, cancellation, retry, navigation. |
+| `src/renderer/views/meanwhileImages.ts` | Timetable/outing location-to-art mapping, native background resolution and optional City Life/custom art. |
 | `src/renderer/vu_styles/Meanwhile.css` | Native day/night paper palette, responsive layout. |
-| `src/renderer/views/GameMenuModal.tsx`, `GameView.tsx` | Menu entry and panel routing. |
+| `src/renderer/views/BunnyboardModal.tsx`, `src/renderer/stores/bunnyboardStore.ts` | Optional rail tab and transient page routing. |
 | `src/preload/api.d.ts`, `index.ts`, `src/main/ipc.ts`, `src/web/bridge.ts` | Typed `completeMeanwhile` API, cancellation in desktop and browser builds. |
 | `src/shared/types.ts`, `saveRules.ts`, `src/renderer/stores/gameStore.ts` | Optional `GameSave.exNpcWatch`, load/save normalization. |
 | `src/shared/mods.ts` | Independent anytime switch; no requirements. |
@@ -63,6 +79,6 @@ load, rewind, and eviction. Do not inject them into ordinary scene or texting pr
 ## Validation
 
 Run `npm run typecheck`, `npm test`, `npm run build`, and `npm run build:web`.
-For UI review, check Menu → Meanwhile in both palettes, a long dialogue line, Previous,
+For UI review, check Bunnyboard → Meanwhile in both palettes, a long dialogue line, Previous,
 Next, replay, Retry, closing during generation, and a 4:3 viewport. A live provider's
 prose quality still depends on its model; deterministic tests stub generation and disk writes.

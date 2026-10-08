@@ -381,7 +381,9 @@
 
 - The Reschedule grid is Monday-first, because what it prints is a forward run of dates rather than a week.
 - The game stage keeps `@keyframes` and one `transition`: each starts during render on a keyed mount and ends on `animationend`, and that completion is load-bearing state — except the background's fade, which starts once its mounted picture has loaded and does not run at all under the cover.
+- The Bunnyboard’s optional Meanwhile and Whisper pages live inside the phone, each behind its own outline-icon rail tile. With either enabled the rail uses a 12px gap and a 7px diagonal step, keeping all seven destinations on stage. Both pages share `BunnyboardFeature.css`: a display heading and seal over a 230px archive/encounter list and a flexible reading well. Scrolling stays inside the lists and reading wells; the comment composer and spectator controls remain below them. Each page inherits the phone’s palette and its single dismissal shell.
 - The Bunnyboard's phone tilts clockwise, its shadow is larger than its face rather than offset from it, and its ears carry no paper layer — it is the app's mark at stage scale, and a mark wants all four sides.
+- Whisper's rail tile carries a small accent dot for unread issues, with a surface border and a matching accessible label. Its archive begins with “The Wednesday edition” and the automatic-delivery note; the note and archive stay inside the existing left scroller.
 - The day-change splash leans −7°, being a card thrown down rather than a panel.
 - The landing's title leans with the fan it heads and draws its own blob, since motion cannot address a pseudo-element.
 - The landing's suggestion wave is the one idle that stands down for the pointer, a moving row being a moving target.

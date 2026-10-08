@@ -38,7 +38,11 @@ export type TermCarry = Pick<
   | 'bunnybotTwoTimingTipSent'
   | 'bunnybotDeferred'
 > &
-  Pick<Partial<GameSave>, 'tallies' | 'npcFriendships' | 'bunnybotSeenTipSent'> & ModTermCarry
+  Pick<
+    Partial<GameSave>,
+    'tallies' | 'npcFriendships' | 'bunnybotSeenTipSent' | 'exVenusWhisper'
+  > &
+    ModTermCarry
 
 declare module './types' {
   interface PlaythroughRecord {
