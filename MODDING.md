@@ -20,6 +20,7 @@ released it. This branch is every mod together:
 | Breakthrough | Maestro | any time | [notes](docs/mods/breakthrough.md) |
 | Custom soundtracks | Maestro | any time | [notes](docs/mods/custom-soundtracks.md) |
 | Story Memory | Maestro | any time | [notes](docs/mods/story-memory.md) |
+| The Venus Whisper | Maestro | any time | [notes](docs/mods/venus-whisper.md) |
 
 Maestro's mods each came in as their own pull request on the frame and are merged here as he
 wrote them. Continued semesters retain their saved Story Memory, Meanwhile replays,
